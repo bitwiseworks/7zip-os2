@@ -68,6 +68,9 @@ ifdef SYSTEMDRIVE
 IS_MINGW = 1
 endif
 endif
+ifeq ($(shell uname), OS/2)
+IS_OS2 = 1
+endif
 
 ifdef IS_MINGW
 LDFLAGS_STATIC_2 = -static
@@ -103,11 +106,16 @@ ifdef IS_MINGW
 SHARED_EXT=.dll
 LDFLAGS = -shared -DEF $(DEF_FILE) $(LDFLAGS_STATIC)
 else
+ifdef IS_OS2
+SHARED_EXT=.dll
+LDFLAGS = -Zdll $(LDFLAGS_STATIC)
+else
 SHARED_EXT=.so
 LDFLAGS = -shared -fPIC $(LDFLAGS_STATIC)
 CC_SHARED=-fPIC
 endif
 
+endif
 
 else
 
@@ -120,7 +128,11 @@ LDFLAGS = $(LDFLAGS_STATIC)
 ifdef IS_MINGW
 SHARED_EXT=.exe
 else
+ifdef IS_OS2
+SHARED_EXT=.exe
+else
 SHARED_EXT=
+endif
 endif
 
 endif
@@ -253,6 +265,10 @@ endif
 
 LFLAGS_ALL = $(LFLAGS_STRIP) $(MY_ARCH_2) $(LDFLAGS) $(FLAGS_FLTO) $(LD_arch) $(LFLAGS_NOEXECSTACK) $(OBJS) $(MY_LIBS) $(LIB2)
 
+ifdef IS_OS2
+LFLAGS_ALL += -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp -lcx -lstdc++
+endif
+
 # -s : GCC : Remove all symbol table and relocation information from the executable.
 # -s : CLANG : unsupported
 # -s
@@ -278,6 +294,21 @@ $O/resource.o: resource.rc
 # $(RC) $(RFLAGS) resource.rc -FO $@
 
 
+endif
+
+ifdef IS_OS2
+getnum = $(shell sed -n 's/.*$1  *\([0-9*]\)/\1/p' ../../../../C/7zVersion.h)
+MY_VER_MAJOR := $(call getnum,MY_VER_MAJOR)
+MY_VER_MINOR := $(call getnum,MY_VER_MINOR)
+MY_VER_BUILD := $(call getnum,MY_VER_BUILD)
+VENDOR ?=community
+BUILD_INFO=\#\#1\#\# $(shell date +'%d %b %Y %H:%M:%S')     $(shell uname -n)
+BUILDLEVEL_INFO=@\#$(VENDOR):$(MY_VER_MAJOR).$(MY_VER_MINOR).$(MY_VER_BUILD)\#@$(BUILD_INFO)::::$(MY_VER_BUILD)::@@7zip
+$O/7z.def: $(DEF_FILE)
+	@echo 'LIBRARY 7z INITINSTANCE TERMINSTANCE' >$@
+	@echo 'DESCRIPTION "$(BUILDLEVEL_INFO)"' >>$@
+	@echo 'DATA MULTIPLE NONSHARED' >>$@
+	@echo 'EXPORTS' >>$@
 endif
 
 $O/LzmaAlone.o: LzmaAlone.cpp

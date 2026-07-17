@@ -52,4 +52,9 @@ OBJS = \
   $(COMPRESS_OBJS_2) \
   $(SYS_OBJS) \
 
+ifeq ($(shell uname), OS/2)
+IS_OS2 = 1
+OBJS += $O/7z.def
+endif
+
 include ../../7zip_gcc.mak
