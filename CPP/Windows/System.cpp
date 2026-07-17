@@ -7,6 +7,7 @@
 #include <limits.h>
 #if defined(__APPLE__) || defined(__DragonFly__) \
     || defined(BSD) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) \
+    || defined(__OS2__) \
     || defined(__QNXNTO__)
 #include <sys/sysctl.h>
 #else
@@ -340,7 +341,7 @@ bool GetRamSize(size_t &size)
     #if defined(_SC_AIX_REALMEM) // AIX
       size64 = (UInt64)sysconf(_SC_AIX_REALMEM) * 1024;
     #endif
-  #elif 0 || defined(__sun)
+  #elif 0 || defined(__sun) || defined(__OS2__)
     #if defined(_SC_PHYS_PAGES) && defined(_SC_PAGESIZE)
     // FreeBSD, Linux, OpenBSD, and Solaris.
     {

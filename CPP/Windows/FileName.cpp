@@ -70,7 +70,7 @@ void NormalizeDirPathPrefix(UString &dirPath)
 bool IsDrivePath (const wchar_t *s) throw() { return IS_LETTER_CHAR(s[0]) && s[1] == ':' && IS_SEPAR(s[2]); }
 // bool IsDriveName2(const wchar_t *s) throw() { return IS_LETTER_CHAR(s[0]) && s[1] == ':' && s[2] == 0; }
 
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__OS2__) 
 
 bool IsDrivePath2(const wchar_t *s) throw() { return IS_LETTER_CHAR(s[0]) && s[1] == ':'; }
 
@@ -147,7 +147,7 @@ bool IsSuperPath(const wchar_t *s) throw();
 bool IsSuperPath(const wchar_t *s) throw() { return IS_SUPER_PREFIX(s); }
 // bool IsSuperUncPath(const wchar_t *s) throw() { return (IS_SUPER_PREFIX(s) && IS_UNC_WITH_SLASH(s + kSuperPathPrefixSize)); }
 
-#if defined(_WIN32) && !defined(UNDER_CE)
+#if (defined(_WIN32) && !defined(UNDER_CE)) || defined(__OS2__)
 
 #define IS_SUPER_OR_DEVICE_PATH(s) (IS_SEPAR((s)[0]) && IS_SEPAR((s)[1]) && ((s)[2] == '?' || (s)[2] == '.') && IS_SEPAR((s)[3]))
 bool IsSuperOrDevicePath(const wchar_t *s) throw() { return IS_SUPER_OR_DEVICE_PATH(s); }
@@ -399,7 +399,7 @@ static unsigned GetRootPrefixSize_Of_SuperPath(const wchar_t *s) throw()
   return kSuperPathPrefixSize + (unsigned)(pos + 1);
 }
 
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__OS2__)
 unsigned GetRootPrefixSize(const wchar_t *s) throw()
 #else
 unsigned GetRootPrefixSize_WINDOWS(const wchar_t *s) throw()
@@ -412,7 +412,7 @@ unsigned GetRootPrefixSize_WINDOWS(const wchar_t *s) throw()
   return GetRootPrefixSize_Of_SimplePath(s);
 }
 
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined(__OS2__)
 
 bool IsAbsolutePath(const wchar_t *s) throw() { return IS_SEPAR(s[0]); }
 
@@ -863,7 +863,7 @@ bool GetFullPath(CFSTR dirPrefix, CFSTR s, FString &res)
   unsigned fixedSize = GetRootPrefixSize(curDir);
 
   UString temp;
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__OS2__)
   if (prefixSize != 0)
   {
     /* (s) is absolute path, but only (prefixSize == 1) is possible here.

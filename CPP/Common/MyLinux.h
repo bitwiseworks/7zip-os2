@@ -72,4 +72,81 @@ inline UInt64 MY_dev_makedev(UInt32 __major, UInt32 __minor)
 }
 */
 
+#if defined(__OS2__)
+#include <stdlib.h>
+#include <unistd.h>
+#include <limits.h>
+#include <sys/stat.h>
+#include <InnoTekLIBC/backend.h>
+
+#define OPENAT_BUFFER_SIZE PATH_MAX
+
+#if !defined(AT_SYMLINK_NOFOLLOW)
+#define AT_SYMLINK_NOFOLLOW 0x100
+#endif
+#if !defined(AT_FDCWD)
+#define AT_FDCWD -100
+#endif
+
+inline char *
+openat_proc_name (char buf[OPENAT_BUFFER_SIZE], int fd, char const *file)
+{
+  char *result = buf;
+  int dirlen;
+
+  /* Make sure the caller gets ENOENT when appropriate.  */
+  if (!*file)
+    {
+      buf[0] = '\0';
+      return buf;
+    }
+
+  /* OS/2 kLIBC provides a function to retrieve a path from a fd.  */
+  {
+    char dir[_MAX_PATH];
+    size_t bufsize;
+
+    if (__libc_Back_ioFHToPath (fd, dir, sizeof dir)){
+      return NULL;
+    }
+
+    dirlen = strlen (dir);
+    bufsize = dirlen + 1 + strlen (file) + 1; /* 1 for '/', 1 for null */
+    if (OPENAT_BUFFER_SIZE < bufsize)
+      {
+        result = (char*) malloc (bufsize);
+        if (! result)
+          return NULL;
+      }
+
+    strcpy (result, dir);
+    result[dirlen++] = '/';
+  }
+
+  strcpy (result + dirlen, file);
+  return result;
+}
+
+inline int fstatat(int dirfd, const char *pathname, struct stat *buf, int flags)
+{
+  int ret;
+
+  if (dirfd == AT_FDCWD || pathname[0]=='/' || pathname[1]==':')
+    return stat(pathname, buf);
+
+  char proc_buf[OPENAT_BUFFER_SIZE];
+  char *proc_file = openat_proc_name (proc_buf, dirfd, pathname);
+
+  if (flags & AT_SYMLINK_NOFOLLOW)
+    ret = lstat(proc_file, buf);
+  else
+    ret = stat(proc_file, buf);
+
+  if (proc_file != proc_buf)
+    free (proc_file);
+
+  return (ret);
+}
+#endif
+
 #endif

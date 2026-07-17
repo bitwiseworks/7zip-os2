@@ -2409,7 +2409,7 @@ void CLinkInfo::Remove_AbsPathPrefixes()
     if (!Is_WSL())
     {
       n =
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined(__OS2__)
       isWindowsPath ?
         NName::GetRootPrefixSize_WINDOWS(LinkPath) :
 #endif

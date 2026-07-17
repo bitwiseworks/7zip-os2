@@ -25,7 +25,7 @@ If you did not intend to use a system-defined macro "major",
 you should undefine it after including <sys/types.h>
 */
 // for major()/minor():
-#if defined(__APPLE__) || defined(__DragonFly__) || \
+#if defined(__APPLE__) || defined(__DragonFly__) || defined(__OS2__) || \
     defined(BSD) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
 #include <sys/types.h>
 #else

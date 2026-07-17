@@ -999,7 +999,7 @@ int Main2(
     
     #else
     
-#if !defined(__sun)
+#if !defined(__sun) && !defined(__OS2__)
     struct winsize w;
     if (ioctl(0, TIOCGWINSZ, &w) == 0)
       consoleWidth = w.ws_col;

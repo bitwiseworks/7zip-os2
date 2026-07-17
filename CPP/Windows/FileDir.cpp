@@ -521,6 +521,9 @@ bool CreateComplexDir(CFSTR _path)
 
   const FString path2 (path);
   pos = (int)path.Len();
+#if defined(__OS2__)
+  const unsigned prefixSize = GetRootPrefixSize(_path);
+#endif
   
   for (;;)
   {
@@ -532,7 +535,7 @@ bool CreateComplexDir(CFSTR _path)
     if (pos < 0 || pos == 0)
       return false;
     
-    #if defined(_WIN32) && !defined(UNDER_CE)
+    #if (defined(_WIN32) && !defined(UNDER_CE)) || defined(__OS2__)
     if (pos == 1 && IS_PATH_SEPAR(path[0]))
       return false;
     if (prefixSize >= (unsigned)pos + 1)
@@ -1226,7 +1229,17 @@ static bool SetFileTime_Base(CFSTR path, const CFiTime *cTime, const CFiTime *aT
   // if (mTime) { printf("\n time = %ld.%9ld\n", mTime->tv_sec, mTime->tv_nsec);  }
   if (!needChange)
     return true;
+#ifdef __OS2__
+  (void)flags; 
+  struct timeval tv[2];
+  tv[0].tv_sec = times[0].tv_sec;
+  tv[0].tv_usec = times[0].tv_nsec / 1000;
+  tv[1].tv_sec = times[1].tv_sec;
+  tv[1].tv_usec = times[1].tv_nsec / 1000;
+  return utimes(path, tv) == 0;
+#else
   return utimensat(AT_FDCWD, path, times, flags) == 0;
+#endif
 }
 
 bool SetDirTime(CFSTR path, const CFiTime *cTime, const CFiTime *aTime, const CFiTime *mTime)

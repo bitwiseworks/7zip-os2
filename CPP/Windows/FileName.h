@@ -30,7 +30,7 @@ const unsigned kDevicePathPrefixSize = 4;
 const unsigned kSuperPathPrefixSize = 4;
 const unsigned kSuperUncPathPrefixSize = kSuperPathPrefixSize + 4;
 
-#if defined(_WIN32) && !defined(UNDER_CE)
+#if (defined(_WIN32) && !defined(UNDER_CE)) || defined(__OS2__)
 
 bool IsDevicePath(CFSTR s) throw();   /* \\.\ */
 bool IsSuperUncPath(CFSTR s) throw(); /* \\?\UNC\ */
