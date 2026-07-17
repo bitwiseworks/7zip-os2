@@ -115,12 +115,23 @@ FString GetModuleDirPrefix()
 #include <dlfcn.h>
 #include <stdlib.h>
 
+#ifdef __OS2__ // snprintf
+#include <stdio.h>
+#endif
+
 // FARPROC
 void *GetProcAddress(HMODULE module, LPCSTR procName)
 {
   void *ptr = NULL;
   if (module)
     ptr = dlsym(module, procName);
+#ifdef __OS2__
+    if (ptr == NULL) {
+       char procName2[256];
+       snprintf(procName2, sizeof(procName2), "_%s", procName);
+       ptr = dlsym(module, procName2);
+    }
+#endif
   return ptr;
 }
 

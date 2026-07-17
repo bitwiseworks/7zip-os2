@@ -70,7 +70,7 @@ using namespace NFile;
 
 
 static CFSTR const kMainDll =
-  #ifdef _WIN32
+  #if defined(_WIN32) || defined(__OS2__)
     FTEXT("7z.dll");
   #else
     FTEXT("7z.so");
