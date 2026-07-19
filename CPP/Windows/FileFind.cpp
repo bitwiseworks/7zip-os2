@@ -1437,7 +1437,13 @@ bool CEnumerator::Fill_FileInfo(const CDirEntry &de, CFileInfo &fileInfo, bool f
   // printf("\nCEnumerator::Fill_FileInfo()\n");
   struct stat st;
   // probably it's OK to use fstatat() even if it changes file position dirfd(_dir)
+#ifndef __OS2__
   int res = fstatat(dirfd(_dir), de.Name, &st, followLink ? 0 : AT_SYMLINK_NOFOLLOW);
+#else
+  // as our dirfd() is completely broken (or not implemented), we cant use fstatat()
+  const FString path = _wildcard + de.Name;
+  int res = MY_lstat(path, &st, followLink);
+#endif
   // if fstatat() is not supported, we can use stat() / lstat()
   
   /*

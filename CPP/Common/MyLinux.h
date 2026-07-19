@@ -107,6 +107,7 @@ openat_proc_name (char buf[OPENAT_BUFFER_SIZE], int fd, char const *file)
     size_t bufsize;
 
     if (__libc_Back_ioFHToPath (fd, dir, sizeof dir)){
+      printf("libc error: %i, %i\n", fd, errno);
       return NULL;
     }
 
@@ -131,12 +132,14 @@ inline int fstatat(int dirfd, const char *pathname, struct stat *buf, int flags)
 {
   int ret;
 
+  printf("trace pathname: %s\n", pathname);
   if (dirfd == AT_FDCWD || pathname[0]=='/' || pathname[1]==':')
     return stat(pathname, buf);
 
   char proc_buf[OPENAT_BUFFER_SIZE];
   char *proc_file = openat_proc_name (proc_buf, dirfd, pathname);
 
+  printf("trace procfile: %s\n", proc_file);
   if (flags & AT_SYMLINK_NOFOLLOW)
     ret = lstat(proc_file, buf);
   else
