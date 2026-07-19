@@ -107,7 +107,11 @@ typedef LONG SCODE;
 #else
 // do we need __export here?
 #define STDMETHODCALLTYPE
+#ifndef __OS2__
 #define STDAPICALLTYPE
+#else
+#define STDAPICALLTYPE __declspec(dllexport)
+#endif
 #endif
 
 #define STDAPI  EXTERN_C HRESULT STDAPICALLTYPE
